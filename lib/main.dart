@@ -15,13 +15,11 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  String _locationMessage = "Clique no botão para obter as coordenadas."; // Mensagem inicial
-  String _address = "Endereço não disponível."; // Endereço inicial
+  String _locationMessage = "Clique no botão para obter as coordenadas.";
+  String _address = "Endereço não disponível.";
 
-  // Função para obter localização e buscar endereço
   void getLocation() async {
     try {
-      // Obter permissões
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -34,7 +32,6 @@ class _MainAppState extends State<MainApp> {
         return;
       }
 
-      // Obter a localização atual
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
@@ -43,7 +40,6 @@ class _MainAppState extends State<MainApp> {
             "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
       });
 
-      // Obter o endereço via Nominatim API
       final url =
           'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}&zoom=18&addressdetails=1';
       final response = await http.get(Uri.parse(url));
