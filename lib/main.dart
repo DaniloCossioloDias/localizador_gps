@@ -23,7 +23,8 @@ class _MainAppState extends State<MainApp> {
     setState(() {
       _locationMessage = "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
     });
-  }
+  }git commit -m "Primeiro commit do projeto"
+
 
   @override
   Widget build(BuildContext context) {
