@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 void main() {
   runApp(const MainApp());
@@ -16,15 +17,16 @@ class _MainAppState extends State<MainApp> {
   String _locationMessage = "Clique no botão para obter as coordenadas.";
 
   void getLocation() async {
-    // Obter a posição atual do dispositivo
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
-    // Atualizar o estado com as coordenadasgit remote add origin https://github.com/DaniloCossioloDias/localizador_gps.git
-    setState(() {
-      _locationMessage = "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
-    });
-  }git commit -m "Primeiro commit do projeto"
+    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    Placemark place = placemarks[0];
 
+    setState(() {
+      _locationMessage = "Latitude: ${position.latitude}, Longitude: ${position.longitude}\n"
+          "Cidade: ${place.locality}, Região: ${place.administrativeArea}, País: ${place.country}";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
