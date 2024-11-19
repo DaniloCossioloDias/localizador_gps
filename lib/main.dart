@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(const MainApp());
@@ -14,18 +15,65 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  String _locationMessage = "Clique no botão para obter as coordenadas.";
+  String _locationMessage = "Clique no botão para obter as coordenadas."; // Mensagem inicial
+  String _address = "Endereço não disponível."; // Endereço inicial
 
+  // Função para obter localização e buscar endereço
   void getLocation() async {
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    try {
+      // Obter permissões
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _locationMessage = "Permissão negada permanentemente.";
+          _address = "Não foi possível acessar o endereço.";
+        });
+        return;
+      }
 
-    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-    Placemark place = placemarks[0];
+      // Obter a localização atual
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      setState(() {
+        _locationMessage =
+            "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
+      });
 
-    setState(() {
-      _locationMessage = "Latitude: ${position.latitude}, Longitude: ${position.longitude}\n"
-          "Cidade: ${place.locality}, Região: ${place.administrativeArea}, País: ${place.country}";
-    });
+      // Obter o endereço via Nominatim API
+      final url =
+          'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}&zoom=18&addressdetails=1';
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data['address'] != null) {
+          final address = data['address'];
+          setState(() {
+            _address =
+                "${address['road'] ?? 'Rua desconhecida'}, ${address['suburb'] ?? 'Bairro desconhecido'}, ${address['city'] ?? 'Cidade desconhecida'}, ${address['state'] ?? 'Estado desconhecido'}, ${address['country'] ?? 'País desconhecido'}";
+          });
+        } else {
+          setState(() {
+            _address = "Endereço não encontrado.";
+          });
+        }
+      } else {
+        setState(() {
+          _address = "Erro ao buscar endereço (${response.statusCode}).";
+        });
+      }
+    } catch (e) {
+      print("Erro ao obter localização ou endereço: $e");
+      setState(() {
+        _locationMessage = "Erro ao obter localização.";
+        _address = "Erro inesperado.";
+      });
+    }
   }
 
   @override
@@ -46,7 +94,13 @@ class _MainAppState extends State<MainApp> {
               const SizedBox(height: 20),
               Text(
                 _locationMessage,
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                _address,
+                style: const TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
