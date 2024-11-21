@@ -15,11 +15,9 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  String _locationMessage = "Obtendo localização...";
   String _address = "Endereço não disponível.";
   String _weatherInfo = "Informações do clima não disponíveis.";
   String _temperature = "Temperatura não disponível.";
-  String _altitude = "Altitude não disponível.";
 
   // Outras funções permanecem iguais (getLocation, getAddress, getWeather)
   void getLocation() async {
@@ -30,7 +28,6 @@ class _MainAppState extends State<MainApp> {
       }
       if (permission == LocationPermission.deniedForever) {
         setState(() {
-          _locationMessage = "Permissão negada permanentemente.";
           _address = "Não foi possível acessar o endereço.";
         });
         return;
@@ -39,11 +36,6 @@ class _MainAppState extends State<MainApp> {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      setState(() {
-        _locationMessage =
-        "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
-        _altitude = "Altitude: ${position.altitude} metros";
-      });
 
       // Obtendo o endereço
       await getAddress(position.latitude, position.longitude);
@@ -53,7 +45,6 @@ class _MainAppState extends State<MainApp> {
     } catch (e) {
       print("Erro ao obter localização ou endereço: $e");
       setState(() {
-        _locationMessage = "Erro ao obter localização.";
         _address = "Erro inesperado.";
         _weatherInfo = "Informações do clima não disponíveis.";
         _temperature = "Temperatura não disponível.";
