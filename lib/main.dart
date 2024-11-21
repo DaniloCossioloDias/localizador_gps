@@ -15,12 +15,13 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  String _locationMessage = "Clique no botão para obter as coordenadas.";
+  String _locationMessage = "Obtendo localização...";
   String _address = "Endereço não disponível.";
   String _weatherInfo = "Informações do clima não disponíveis.";
   String _temperature = "Temperatura não disponível.";
   String _altitude = "Altitude não disponível.";
 
+  // Outras funções permanecem iguais (getLocation, getAddress, getWeather)
   void getLocation() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
@@ -40,13 +41,13 @@ class _MainAppState extends State<MainApp> {
       );
       setState(() {
         _locationMessage =
-            "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
+        "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
         _altitude = "Altitude: ${position.altitude} metros";
       });
 
       // Obtendo o endereço
       await getAddress(position.latitude, position.longitude);
-      
+
       // Obtendo informações do clima
       await getWeather(position.latitude, position.longitude);
     } catch (e) {
@@ -72,7 +73,7 @@ class _MainAppState extends State<MainApp> {
         final address = data['address'];
         setState(() {
           _address =
-              "${address['road'] ?? 'Rua desconhecida'}, ${address['suburb'] ?? 'Bairro desconhecido'}, ${address['city'] ?? 'Cidade desconhecida'}, ${address['state'] ?? 'Estado desconhecido'}, ${address['country'] ?? 'País desconhecido'}";
+          "${address['road'] ?? 'Rua desconhecida'}, ${address['suburb'] ?? 'Bairro desconhecido'}, ${address['city'] ?? 'Cidade desconhecida'}, ${address['state'] ?? 'Estado desconhecido'}, ${address['country'] ?? 'País desconhecido'}";
         });
       } else {
         setState(() {
@@ -96,8 +97,8 @@ class _MainAppState extends State<MainApp> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       setState(() {
-        _temperature = "Temperatura: ${data['main']['temp']} °C";
-        _weatherInfo = "Clima: ${data['weather'][0]['description']}";
+        _temperature = "${data['main']['temp']}°C";
+        _weatherInfo = "${data['weather'][0]['description']}";
       });
     } else {
       setState(() {
@@ -111,39 +112,62 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text("Localizador e Clima"),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: getLocation,
-                child: const Text("Obter Localização"),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _locationMessage,
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _address,
-                style: const TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _temperature,
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _weatherInfo,
-                style: const TextStyle(fontSize: 18),
-              ),
-            ],
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.lightBlue, Colors.indigo],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _temperature,
+                  style: const TextStyle(
+                    fontSize: 50,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  _weatherInfo,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                Text(
+                  _address,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: getLocation,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white, // Substitui "primary"
+                    foregroundColor: Colors.blue, // Substitui "onPrimary"
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 20,
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                  child: const Text("Atualizar"),
+                ),
+              ],
+            ),
           ),
         ),
       ),
